@@ -1,0 +1,181 @@
+101_XX_001_MODE_06_SUB_00_DP034_221126_051540_IRX.ntf, MSP, MW1, MX4, NIR, S1A, SW2, TRX, VSC.... epm, COMPLETED, PROCESSING_LOG, SCUAUX
+
+CL1 was just removed
+
+DEBUG1  TimerReport   Tim:    17.601559  Overal  101_XX_051540
+DEBUG3  main    ##
+DEBUG3  main    ## Done processing 101_XX_051540.
+DEBUG3  main    ##
+
+
+
+/opt/p3i/gnd/GRscripts/DGS3local/ADGFilter.s2c    ./ADGFilter_v1.py
+
+
+
+
+sc.info
+# S2C AUTO-FILTER
+380000N1000000E
+...
+370000N1000000E
+
+config_V1.xml
+<?xml version="1.0"?>
+<config>
+   <title>Area of Interest Parser</title>
+   <sleep>1</sleep>
+   imageorigin> imagefinal> rejectoutput> mspoutput> mspemp>
+   <missionidfilename></missionidfilename>
+   <aoi>
+        <code>sc</code>
+        <name>SYER2C</name>
+   <aoi>
+   <aoifilesloc>./<aoifilesloc>
+</config>
+
+ppi pre-processed imagery
+
+
+ADGFilter_V1.py
+ACFTBFilter.py
+
+import os,struct,shutil,re
+
+class ACFTBFilter (object):
+
+    def __init__(self, fullpath):
+       self.fullpath = fullpath
+       self.filename = fullpath.split('/')[-1]
+       
+    def check(self):
+        if (os.path.isfile(self.fullpath)):
+            data = None
+            result = True
+            try:
+                 f = open(self.fullpath, 'rb')
+                 data = f.read(20000)
+            except IOError:
+                 return False
+            result = False
+            return result
+            
+                 
+     def fix(self):
+        if (os.path.isfile(self.fullpath)):
+        
+            f = open(self.fullpath, 'rb+')
+            str = f.read(20000)
+            offset str.index("ACFTB")
+            f.seek(offset+92)
+            f.write("100000.0000N1000000.0000E")
+            f.seek(offset+130)
+            f.write("100000.0000N1000000.0000E")
+            
+            offset str.index("AIMDB")
+            f.seek(offset+76)
+            f.write('0000N00000E')
+            
+            f.close()
+            return True
+            
+            
+            
+            ******************************
+         
+       ADGFilter.py
+       
+       
+       os.umask(0u000)
+       while (True):
+       
+           bandtypes = ('*_IRC.ntf','*_IRX.ntf' MXC, MX1
+           MX2 MX3 MX4 CMC
+           TRU TRX BLU RED
+           NTC S1A S1B SW2
+           GRN CYN MW1 YEL   - CL1 MW2 SW1 DWC
+           
+           newdirs = glob.glob(originaDirectory+"/[0123456789]*/")
+           for dir1 in newdirs:
+             if self.isdirreadyprocessinglog(dir1) and self.nogeosfile(dir1)
+             
+                itr=0
+                msitr+=1
+                badgeos=dir1+"/BADGEOS"
+                goodgeos=dir1+"/GOODGEOS"
+                imagefiles = []
+                
+                for bandtype in bandtypes:
+                   imagefiles.extend(glob.glob(dir1+bandtype))
+                   
+                   for ifile in imagefiles:
+                       filename = ifile.split('/')[-1]
+                       print('\n')
+                       print(filename)
+                       
+                       bandsafilter = BANDSAFilter(ifile)
+                       bandsaresult = bandsafilter.check()
+                       if (bandsaresult == False):
+                           print ( "Fixing the bandsa" )
+                           bandsaresult = bandsafilter.fix(rejectDirectory)
+                       bandsaresult=True
+                       
+                       print(ifile)
+                       geofilter = GEOFilter(ifile, self.aois)
+                       georesult = geofilter.check()
+                       if (georesult == False):
+                           print "CHECK Corners are outside the area"
+                           badgeosfiles=open(badgeos,'w')
+                           badgeosfile.write("BAD GEOS") <--- Change to the specific band geos
+                           badgeosfile.close()
+                       georesult=True
+                       
+                       acftbfilter = ACFTBFilter(ifile)
+                       acftbresult = actbfilter.check()
+                       if (acftbresult == False):
+                           acftbresult = acftbfilter.fix(rejectDirectory)
+                       acftbresult=True
+                       
+                       aimdbfilter = AIMDBFilter(ifile)
+                       aimdbresult = aimdbfilter.check()
+                       if (aimdbresult == False):
+                           aimdbresult = aimdbfilter.fix(rejectDirectory)
+                       aimdbresult = True
+                       
+                       mstgtfilter = MSTGTFilter(ifile)
+                       mstgtresult = mstgtfilter.check()
+                       if (mstgtresult == False):
+                           mstgtresult = mstgtfilter.fix(rejectDirectory)
+                       
+                if not os.path.isfile(badgeos):
+                    goodgeosfile=open(goodgeos,'w')
+                    goodgeosfile.write("GOOD GEOS")
+                    goodgeosfile.close()
+                
+                scenedir = dir1.split('/')[-2]
+                print(finalDirectory)
+                finaldir = finalDirectory+"/"+scenedir
+                
+                print("Moving to final Directory")
+                while(os.path.exists(finadir)
+                  finaldir = finaldir+"_copy"
+                shutil.move(dir1,finaldir)
+                
+                completefilename=finalDirectory+'/'+scenedir+'/COMPLETE'
+                print(completefilename)
+                open(completefilename,'a').close()
+                
+                skip=0
+          sleep = float(self.xmltree.findall('sleep')[0].text)
+          timer = 0.0
+          while (timer < sleep):
+            if skip==0:
+              skip=1
+              sys.stdout.write("\n")
+            sys.stdout.write(".")
+            sys.stdout.flush()
+            timer.sleep(1.0)
+            timer += 1.0
+            
+if __name__ == '__main__':
+    ADGFilter().mainloop()
