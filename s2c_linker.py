@@ -1,8 +1,8 @@
-import os, json
+import os, json, pickle
 
 class s2c_mission():
-    def __init__(self):
-        self.missionid=""
+    def __init__(self, missionid):
+        self.missionid=missionid
         self.scenes={}
         self.populate()
 
@@ -30,8 +30,7 @@ class s2c_scenes():
             self.files[i] = file
             
     def print_scenes(self):
-        print("Scene ID: ")
-        print(self.sceneid)
+        print("Scene ID: %d" % self.sceneid)
         for i in self.files:
             self.files[i].print_file()
 
@@ -41,26 +40,44 @@ class s2c_file():
         self.idx=idx
 
     def print_file(self):
-        print("File Index:")
-        print(self.idx)
+        print("File Index: %d" % self.idx)
 
 class s2c_linker():
 
     def __init__(self):
         self.config = None 
-        self.read_configuration("./config.json")
-        self.mission = s2c_mission()
 
     def read_configuration(self,config_file):
+        self.mission = s2c_mission("SPS2K52")
         if os.path.isfile(config_file) and os.access(config_file, os.R_OK):
             with open(config_file, "r") as jsonfile:
                 self.config = json.load(jsonfile)
             jsonfile.close()
 
     def show_configuration(self):
-        print(self.config["sleep"])
+        if self.config == None:
+            print("Sleep configuration not found")
+        else:
+            print("Sleep configuration: %d" % self.config["sleep"])
         self.mission.print_mission()
+
+    def save_state(self):
+        fileObj = open('./data.obj', 'wb')
+        pickle.dump(self.mission,fileObj)
+        fileObj.close()
+
+    def load_state(self):
+        fileObj = open('./data.obj', 'rb')
+        self.mission = pickle.load(fileObj)
+        fileObj.close()
 
 if __name__ == "__main__":
     S2C = s2c_linker()
+#    S2C.read_configuration()
+#    S2C.show_configuration()
+#    S2C.save_state()
+
+    S2C.load_state()
     S2C.show_configuration()
+
+    
